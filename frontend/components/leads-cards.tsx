@@ -23,16 +23,42 @@ export default function LeadCard({
 }) {
   const [showOutreach, setShowOutreach] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [email, setEmail] = useState("");
+  const [loadingEmail, setLoadingEmail] = useState(false);
+
+
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(lead.email_copy || "");
+      await navigator.clipboard.writeText(email || "");
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch (error) {
       console.error("Copy failed:", error);
     }
   };
+  const handleGenerateEmail = async () => {
+  setShowOutreach(true);
+  setLoadingEmail(true);
+
+  try {
+    const res = await fetch("http://localhost:8000/generate-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(lead),
+    });
+
+    const data = await res.json();
+    setEmail(data.email || "No outreach email generated.");
+  } catch (error) {
+    console.error("Email generation failed:", error);
+    setEmail("Failed to generate email.");
+  } finally {
+    setLoadingEmail(false);
+  }
+};
 
   return (
     <div
@@ -72,10 +98,17 @@ export default function LeadCard({
 
       <div className="mt-5">
         <button
-          onClick={() => setShowOutreach((prev) => !prev)}
+          onClick={email ? () => setShowOutreach((prev) => !prev) : handleGenerateEmail}
           className="rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-2 font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
         >
-          {showOutreach ? "Hide Outreach" : "Generate Outreach"}
+          {loadingEmail
+           ? "Generating..." 
+           : showOutreach
+           ? "Hide Outreach..."
+           : email
+           ? "Show Outreach..."
+           : "Generate Outreach"
+          }
         </button>
       </div>
 
@@ -117,7 +150,7 @@ export default function LeadCard({
                 isDark ? "text-white/90" : "text-gray-800"
               }`}
             >
-              {lead.email_copy || "No outreach email available."}
+              {loadingEmail ? "Generating outreach email..." : email || "No outreach email available."}
             </pre>
           </div>
         </div>
@@ -125,3 +158,4 @@ export default function LeadCard({
     </div>
   );
 }
+

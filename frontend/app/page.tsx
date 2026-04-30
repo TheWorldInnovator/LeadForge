@@ -216,6 +216,17 @@ export default function HomePage() {
         </div>
       )}
 
+      {leads.length > 0 && (
+  <div className="mt-6 mb-4 flex justify-start">
+    <button
+      onClick={exportToCSV}
+      className="rounded-xl bg-green-600 px-6 py-3 font-semibold text-white transition hover:bg-green-700"
+    >
+      Export CSV
+    </button>
+  </div>
+)}
+
       {status === "completed" && leads.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           {leads.map((lead, index) => (
@@ -233,4 +244,54 @@ export default function HomePage() {
       )}
     </main>
   );
+  function exportToCSV() {
+  if (!leads || leads.length === 0) {
+    alert("No leads to export.");
+    return;
+  }
+
+  const headers = [
+    "Name",
+    "Rating",
+    "Reviews",
+    "Address",
+    "Contact Number",
+    "Website",
+    "Opportunity",
+    "Reasoning",
+  ];
+
+  const rows = leads.map((lead) => [
+    lead.name,
+    lead.rating,
+    lead.reviews,
+    lead.address,
+    lead.contact_number,
+    lead.website,
+    lead.opportunity,
+    lead.display_reasoning,
+  ]);
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) =>
+      row
+        .map((value) => `"${String(value ?? "").replaceAll('"', '""')}"`)
+        .join(",")
+    ),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], {
+    type: "text/csv;charset=utf-8;",
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "leads.csv";
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
 }

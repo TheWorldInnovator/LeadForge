@@ -1,6 +1,6 @@
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from lead_generator import generate_leads_logic
+from lead_generator import generate_leads_logic, generate_email_groq
 from pydantic import BaseModel
 app = FastAPI()
 
@@ -54,7 +54,8 @@ def run_generation_job(niche, city):
         results = generate_leads_logic(
             niche=niche,
             city=city,
-            progress_callback=update_progress)
+            progress_callback=update_progress,
+            max_results=100)
 
         leads_data = results
         job_status = "completed"
@@ -99,3 +100,8 @@ def get_status():
 @app.get("/leads")
 def get_leads():
     return leads_data
+
+@app.post("/generate-email")
+def generate_email(lead: dict):
+    email = generate_email_groq(lead)
+    return {"email": email}
