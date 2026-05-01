@@ -42,7 +42,9 @@ export default function LeadCard({
   setLoadingEmail(true);
 
   try {
-    const res = await fetch("http://localhost:8000/generate-email", {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+    const res = await fetch(`${API_URL}/generate-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
