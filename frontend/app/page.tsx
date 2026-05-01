@@ -1,5 +1,5 @@
 "use client";
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 import { useEffect, useState } from "react";
 import LeadCard from "../components/leads-cards";
 import ProgressPanel from "../components/progress-panel";
@@ -55,7 +55,7 @@ export default function HomePage() {
     }
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/generate-leads", {
+      const res = await fetch(`${API_URL}/generate-leads`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -84,7 +84,7 @@ export default function HomePage() {
 
   const fetchStatus = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/status");
+      const res = await fetch(`${API_URL}/status`);
       const data = await res.json();
 
       setStatus(data.status || "idle");
@@ -96,7 +96,7 @@ export default function HomePage() {
       setError(data.error || "");
 
       if (data.status === "completed") {
-        const leadsRes = await fetch("http://127.0.0.1:8000/leads");
+        const leadsRes = await fetch(`${API_URL}/leads`);
         const leadsData = await leadsRes.json();
         setLeads(leadsData);
       }
